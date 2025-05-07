@@ -2,38 +2,57 @@
 
 // src/components/AuthForm.tsx
 
-import { supabase } from '@/lib/supabaseClient';
+import { createClient } from '@/utils/supabase/client';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 export default function AuthForm() {
+  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLogin, setIsLogin] = useState(true)
   const [loading, setLoading] = useState(false)
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
-  async function handleSignup() {
-    setLoading(true)
-    const { error } = await supabase.auth.signUp({ email, password })
-    setLoading(false)
-    if (error) alert(error.message)
-    else alert('Revisa tu email para confirmar tu cuenta')
-  }
-
-  async function handleLogin() {
-    setLoading(true)
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    setLoading(false)
-    if (error) alert(error.message)
-    else alert('Ingresaste correctamente')
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
+  async function handleSignup(e: React.FormEvent) {
     e.preventDefault()
-    if (isLogin) {
-      handleLogin()
+    setLoading(true)
+    setErrorMsg(null)
+    
+    const supabase = createClient()
+    const { error } = await supabase.auth.signUp({ 
+      email, 
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    })
+    
+    setLoading(false)
+    
+    if (error) {
+      setErrorMsg(error.message)
     } else {
-      handleSignup()
+      // Para email confirmation
+      alert('Revisa tu email para confirmar tu cuenta')
+    }
+  }
+
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault()
+    setLoading(true)
+    setErrorMsg(null)
+    
+    const supabase = createClient()
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    
+    if (error) {
+      setLoading(false)
+      setErrorMsg(error.message)
+    } else {
+      router.refresh()
+      router.push('/dashboard')
     }
   }
 
@@ -51,7 +70,13 @@ export default function AuthForm() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        {errorMsg && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm">
+            {errorMsg}
+          </div>
+        )}
+
+        <form onSubmit={isLogin ? handleLogin : handleSignup} className="space-y-5">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1">
               Email
@@ -120,11 +145,13 @@ export default function AuthForm() {
           <div className="flex gap-4">
             <button 
               className="flex-1 py-2.5 border border-input rounded-xl hover:bg-secondary/10 transition font-medium text-foreground text-sm"
+              onClick={() => alert('Función en desarrollo')}
             >
               Google
             </button>
             <button 
               className="flex-1 py-2.5 border border-input rounded-xl hover:bg-secondary/10 transition font-medium text-foreground text-sm"
+              onClick={() => alert('Función en desarrollo')}
             >
               LinkedIn
             </button>

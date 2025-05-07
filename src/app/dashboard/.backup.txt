@@ -1,0 +1,202 @@
+"use client"
+export const dynamic = 'force-dynamic'
+// src/app/dashboard/page.tsx
+
+import { createClient } from '@/utils/supabase/server';
+import Image from 'next/image';
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { ReactNode } from 'react';
+import DashboardContent from './dashboard-content';
+
+interface LearningPath {
+  id: number;
+  title: string;
+  description: string;
+  level: string;
+  duration: string;
+  progress: number;
+}
+
+interface Cofounder {
+  id: number;
+  name: string;
+  role: string;
+  compatibility: number;
+  avatar: string;
+}
+
+interface StatCardProps {
+  icon: ReactNode;
+  title: string;
+  value: string;
+  label: string;
+}
+
+interface LearningPathCardProps {
+  path: LearningPath;
+}
+
+interface CofounderCardProps {
+  person: Cofounder;
+}
+
+// Datos de ejemplo para el dashboard
+const learningPaths: LearningPath[] = [
+  {
+    id: 1,
+    title: 'Desarrollo Frontend con React',
+    description: 'Aprende a crear interfaces modernas con React y Next.js',
+    level: 'Intermedio',
+    duration: '8 semanas',
+    progress: 35,
+  },
+  {
+    id: 2,
+    title: 'Ciencia de Datos para emprendedores',
+    description: 'Fundamentos de análisis de datos para tomar mejores decisiones',
+    level: 'Principiante',
+    duration: '6 semanas',
+    progress: 20,
+  },
+  {
+    id: 3,
+    title: 'Estrategias de Monetización Digital',
+    description: 'Aprende a generar ingresos con tu proyecto digital',
+    level: 'Avanzado',
+    duration: '4 semanas',
+    progress: 10,
+  },
+]
+
+const cofounderSuggestions: Cofounder[] = [
+  {
+    id: 1,
+    name: 'Ana Rodríguez',
+    role: 'UX/UI Designer',
+    compatibility: 85,
+    avatar: 'https://i.pravatar.cc/100?img=26',
+  },
+  {
+    id: 2,
+    name: 'Carlos Méndez',
+    role: 'Backend Developer',
+    compatibility: 78,
+    avatar: 'https://i.pravatar.cc/100?img=12',
+  },
+  {
+    id: 3,
+    name: 'Laura Sánchez',
+    role: 'Marketing Specialist',
+    compatibility: 72,
+    avatar: 'https://i.pravatar.cc/100?img=4',
+  },
+]
+
+export default async function DashboardPage() {
+  const supabase = await createClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    redirect('/auth')
+  }
+
+  return <DashboardContent user={user} />
+}
+
+function StatCard({ icon, title, value, label }: StatCardProps) {
+  return (
+    <div className="bg-white p-6 rounded-2xl shadow-sm">
+      <div className="flex items-start justify-between">
+        <div>
+          <h3 className="text-sm font-medium text-muted-foreground mb-1">{title}</h3>
+          <p className="text-2xl font-bold text-foreground">{value}</p>
+          <p className="text-xs text-muted-foreground mt-1">{label}</p>
+        </div>
+        <div className="p-2 bg-secondary/30 rounded-xl">
+          {icon}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function LearningPathCard({ path }: LearningPathCardProps) {
+  return (
+    <div className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition">
+      <div className="flex justify-between items-start mb-4">
+        <div>
+          <h3 className="text-xl font-semibold text-foreground">{path.title}</h3>
+          <p className="text-muted-foreground">{path.description}</p>
+        </div>
+        <span className="px-3 py-1 bg-secondary/30 text-xs font-medium rounded-xl">
+          {path.level}
+        </span>
+      </div>
+      
+      <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
+        <span>Duración: {path.duration}</span>
+        <span>Progreso: {path.progress}%</span>
+      </div>
+      
+      {/* Progress bar */}
+      <div className="w-full bg-secondary/30 rounded-full h-2 mb-4">
+        <div 
+          className="bg-primary h-2 rounded-full" 
+          style={{ width: `${path.progress}%` }}
+        ></div>
+      </div>
+      
+      <div className="flex justify-end">
+        <Link
+          href={`/learning/${path.id}`}
+          className="px-4 py-2 bg-primary/10 text-primary rounded-xl text-sm font-medium hover:bg-primary/20 transition"
+        >
+          Continuar
+        </Link>
+      </div>
+    </div>
+  )
+}
+
+function CofounderCard({ person }: CofounderCardProps) {
+  return (
+    <div className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition">
+      <div className="flex items-center gap-4 mb-4">
+        <Image
+          src={person.avatar} 
+          alt={person.name}
+          width={64}
+          height={64}
+          className="rounded-full object-cover"
+        />
+        <div>
+          <h3 className="text-lg font-semibold text-foreground">{person.name}</h3>
+          <p className="text-sm text-muted-foreground">{person.role}</p>
+        </div>
+      </div>
+      
+      <div className="mb-4">
+        <div className="flex justify-between mb-1">
+          <span className="text-sm text-muted-foreground">Compatibilidad</span>
+          <span className="text-sm font-medium">{person.compatibility}%</span>
+        </div>
+        <div className="w-full bg-secondary/30 rounded-full h-2">
+          <div 
+            className="bg-primary h-2 rounded-full" 
+            style={{ width: `${person.compatibility}%` }}
+          ></div>
+        </div>
+      </div>
+      
+      <div className="flex gap-2">
+        <button className="flex-1 px-3 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-medium hover:bg-primary/90 transition">
+          Conectar
+        </button>
+        <button className="flex-1 px-3 py-2 border border-input text-foreground rounded-xl text-sm font-medium hover:bg-secondary/10 transition">
+          Ver perfil
+        </button>
+      </div>
+    </div>
+  )
+} 

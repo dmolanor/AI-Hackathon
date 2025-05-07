@@ -1,37 +1,60 @@
 // src/app/layout.tsx
+import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
 import React from 'react'
 import './globals.css'
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
   return (
     <html lang="es">
       <head />
-      <body
-        className={`font-sans antialiased bg-background text-foreground flex flex-col min-h-screen`}
-      >
+      <body className="font-sans antialiased bg-background text-foreground flex flex-col min-h-screen">
         <header className="w-full bg-background shadow-sm border-b border-border">
           <nav className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
             <Link href="/">
               <span className="text-2xl font-bold text-primary">AI-First Reinventor</span>
             </Link>
             <div className="space-x-6">
-              <Link
-                href="/auth"
-                className="text-sm font-medium text-foreground hover:text-primary transition"
-              >
-                Iniciar sesión
-              </Link>
-              <Link
-                href="/onboarding"
-                className="text-sm font-medium px-4 py-2 bg-primary text-primary-foreground rounded-xl shadow-sm hover:bg-primary/90 transition"
-              >
-                Onboarding
-              </Link>
+              {user ? (
+                <>
+                  <Link
+                    href="/dashboard"
+                    className="text-sm font-medium text-foreground hover:text-primary transition"
+                  >
+                    Dashboard
+                  </Link>
+                  <form action="/auth/signout" method="post">
+                    <button 
+                      type="submit"
+                      className="text-sm font-medium text-foreground hover:text-primary transition"
+                    >
+                      Cerrar sesión
+                    </button>
+                  </form>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/auth"
+                    className="text-sm font-medium text-foreground hover:text-primary transition"
+                  >
+                    Iniciar sesión
+                  </Link>
+                  <Link
+                    href="/onboarding"
+                    className="text-sm font-medium px-4 py-2 bg-primary text-primary-foreground rounded-xl shadow-sm hover:bg-primary/90 transition"
+                  >
+                    Onboarding
+                  </Link>
+                </>
+              )}
             </div>
           </nav>
         </header>
