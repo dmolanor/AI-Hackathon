@@ -4,11 +4,11 @@
 
 import { createClient } from '@/utils/supabase/client';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+// import { useRouter } from 'next/navigation'; // Commented out as router is not used
 import { useState } from 'react';
 
 export default function AuthForm() {
-  const router = useRouter()
+  // const router = useRouter() // Commented out as router is not used
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [firstName, setFirstName] = useState('');
@@ -87,13 +87,20 @@ export default function AuthForm() {
     setLoading(true)
     setErrorMsg(null)
     const supabase = createClient()
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
       setLoading(false)
       setErrorMsg(error.message)
+    } else if (data.session) {
+      console.log('Login successful, session object:', data.session);
+      console.log('User object:', data.user);
+      // router.refresh() // Keep this if you want to try, but window.location.assign will override
+      // router.push('/dashboard')
+      window.location.assign('/dashboard'); // Force a full page load to sync server session state
     } else {
-      router.refresh()
-      router.push('/dashboard')
+      // No session, no user, handle this case
+      setLoading(false); // Ensure loading is stopped
+      setErrorMsg("No se pudo iniciar sesión. Sesión no encontrada después del intento.");
     }
   }
 

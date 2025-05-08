@@ -16,11 +16,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         </div>
         <nav className="mt-4 px-3 space-y-1">
           <SidebarLink href="/dashboard" icon={<Home size={18} />} label="Dashboard" active />
-          <SidebarLink href="/dashboard/profile" icon={<User size={18} />} label="Mi Perfil" />
-          <SidebarLink href="/dashboard/learning" icon={<BookOpen size={18} />} label="Aprendizaje" />
-          <SidebarLink href="/dashboard/community" icon={<Users size={18} />} label="Comunidad" />
-          <SidebarLink href="/dashboard/settings" icon={<Settings size={18} />} label="Configuración" />
-          <SidebarLink href="/dashboard/help" icon={<LifeBuoy size={18} />} label="Ayuda" />
+          <SidebarLink href="/profile" icon={<User size={18} />} label="Mi Perfil" />
+          <SidebarLink href="/learning" icon={<BookOpen size={18} />} label="Aprendizaje" />
+          <SidebarLink href="/community" icon={<Users size={18} />} label="Comunidad" />
+          <SidebarLink href="/settings" icon={<Settings size={18} />} label="Configuración" />
+          <SidebarLink href="/help" icon={<LifeBuoy size={18} />} label="Ayuda" />
           <div className="pt-8 mt-8 border-t border-border">
             <SidebarLink href="/auth/logout" icon={<LogOut size={18} />} label="Cerrar sesión" />
           </div>

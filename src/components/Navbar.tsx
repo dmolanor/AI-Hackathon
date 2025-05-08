@@ -21,14 +21,22 @@ export default function Navbar({ user }: NavbarProps) {
         </AnimatedNavLink>
 
         {/* Navigation Links and Actions */}
-        <div className="flex items-center space-x-4 sm:space-x-6">
+        <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4">
           {user ? (
             <>
               <AnimatedNavLink href="/dashboard">Dashboard</AnimatedNavLink>
+              <AnimatedNavLink href="/profile">Mi Perfil</AnimatedNavLink>
+              <AnimatedNavLink href="/learning">Aprendizaje</AnimatedNavLink>
+              <AnimatedNavLink href="/community">Comunidad</AnimatedNavLink>
+              <AnimatedNavLink href="/settings">Configuración</AnimatedNavLink>
+              <AnimatedNavLink href="/help">Ayuda</AnimatedNavLink>
               <form action="/auth/signout" method="post" className="flex">
                 <button 
                   type="submit"
-                  className="text-sm font-medium text-foreground hover:text-primary transition-colors duration-200"
+                  className={cn(
+                    buttonVariants({ variant: "ghost", size: "sm" }), // Apply button variant for consistency
+                    "text-foreground hover:text-primary"
+                  )}
                 >
                   Cerrar sesión
                 </button>
@@ -36,17 +44,20 @@ export default function Navbar({ user }: NavbarProps) {
             </>
           ) : (
             <>
+              {/* Links para scroll en la página principal */}
+              <AnimatedNavLink href="/#features">Características</AnimatedNavLink>
+              <AnimatedNavLink href="/#testimonials">Testimonios</AnimatedNavLink>
+              <AnimatedNavLink href="/#faq">FAQ</AnimatedNavLink>
+              
               <AnimatedNavLink href="/auth">Iniciar sesión</AnimatedNavLink>
-              {/* Use regular Link styled as button for clearer CTA */}
               <Link 
-                href="/onboarding" 
+                href="/auth?view=sign_up" // O tu ruta de registro preferida, ej /signup
                 className={cn(
-                  buttonVariants({ variant: 'default', size: 'sm' }), // Use buttonVariants
-                  'shadow-sm' // Add shadow consistent with heyfriends
-                  // Adjusted padding/height via size: 'sm' 
+                  buttonVariants({ variant: 'default', size: 'sm' }),
+                  'shadow-sm'
                 )}
               >
-                Comenzar
+                Registrarse
               </Link>
             </>
           )}

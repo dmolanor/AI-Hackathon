@@ -24,6 +24,7 @@ export default function OnboardingPage() {
   const [step, setStep] = useState(1)
   const [formData, setFormData] = useState({
     // Datos de perfil
+    full_name: '',
     age: '',
     country: '',
     city: '',

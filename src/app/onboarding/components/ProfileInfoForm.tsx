@@ -2,6 +2,7 @@ import { FileUp, Loader2 } from 'lucide-react';
 
 interface ProfileInfoFormProps {
   formData: {
+    full_name: string;
     age: string | number;
     country: string;
     city: string;
@@ -16,6 +17,21 @@ interface ProfileInfoFormProps {
 export default function ProfileInfoForm({ formData, updateForm, handleFileUpload, loading }: ProfileInfoFormProps) {
   return (
     <div className="space-y-4">
+      <div>
+        <label htmlFor="full_name" className="block text-sm font-medium text-foreground mb-1">
+          Nombre completo
+        </label>
+        <input
+          id="full_name"
+          type="text"
+          value={formData.full_name}
+          onChange={(e) => updateForm('full_name', e.target.value)}
+          placeholder="Tu nombre completo"
+          className="w-full p-3 border border-input rounded-xl bg-background focus:ring-2 focus:ring-primary focus:outline-none"
+          required
+        />
+      </div>
+      
       <div>
         <label htmlFor="age" className="block text-sm font-medium text-foreground mb-1">
           Edad
