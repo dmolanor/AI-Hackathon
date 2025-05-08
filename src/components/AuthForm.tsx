@@ -15,6 +15,23 @@ export default function AuthForm() {
   const [loading, setLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
+  //async function signInWithGoogle() {
+  //  setLoading(true);
+  //  setErrorMsg(null);
+  //  const supabase = createClient();
+  //  const { error } = await supabase.auth.signInWithOAuth({
+  //    provider: 'google',
+  //    options: {
+  //      redirectTo: `${window.location.origin}/auth/callback`,
+  //    },
+  //  });
+  //  if (error) {
+  //    setErrorMsg(error.message);
+  //    setLoading(false);
+  //  }
+    // No need to setLoading(false) on success as the page will redirect.
+  //}
+
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
@@ -138,14 +155,15 @@ export default function AuthForm() {
           </button>
         </div>
         
-        <div className="mt-8 pt-6 border-t border-border">
+        {/* <div className="mt-8 pt-6 border-t border-border">
           <p className="text-center text-sm text-muted-foreground mb-4">
             O continúa con
           </p>
           <div className="flex gap-4">
             <button 
               className="flex-1 py-2.5 border border-input rounded-xl hover:bg-secondary/10 transition font-medium text-foreground text-sm"
-              onClick={() => alert('Función en desarrollo')}
+              onClick={signInWithGoogle}
+              disabled={loading}
             >
               Google
             </button>
@@ -156,7 +174,7 @@ export default function AuthForm() {
               LinkedIn
             </button>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   )
