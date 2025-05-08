@@ -1,8 +1,18 @@
 // src/app/layout.tsx
+import AnimatedNavLink from '@/components/AnimatedNavLink'
 import { createClient } from '@/utils/supabase/server'
+import { Inter } from 'next/font/google'
 import Link from 'next/link'
 import React from 'react'
 import './globals.css'
+
+// Configure Inter font
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+  weight: ['400', '600', '700']
+})
 
 export default async function RootLayout({
   children,
@@ -13,27 +23,24 @@ export default async function RootLayout({
   const { data: { user } } = await supabase.auth.getUser()
 
   return (
-    <html lang="es">
+    <html lang="es" className={`${inter.variable}`}>
       <head />
       <body className="font-sans antialiased bg-background text-foreground flex flex-col min-h-screen">
         <header className="w-full bg-background shadow-sm border-b border-border">
           <nav className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <Link href="/">
+            <AnimatedNavLink href="/">
               <span className="text-2xl font-bold text-primary">AI-First Reinventor</span>
-            </Link>
-            <div className="space-x-6">
+            </AnimatedNavLink>
+            <div className="flex items-center space-x-6">
               {user ? (
                 <>
-                  <Link
-                    href="/dashboard"
-                    className="text-sm font-medium text-foreground hover:text-primary transition"
-                  >
+                  <AnimatedNavLink href="/dashboard">
                     Dashboard
-                  </Link>
-                  <form action="/auth/signout" method="post">
+                  </AnimatedNavLink>
+                  <form action="/auth/signout" method="post" className="flex">
                     <button 
                       type="submit"
-                      className="text-sm font-medium text-foreground hover:text-primary transition"
+                      className="text-sm font-medium text-foreground hover:text-primary transition-colors duration-200"
                     >
                       Cerrar sesión
                     </button>
@@ -41,18 +48,15 @@ export default async function RootLayout({
                 </>
               ) : (
                 <>
-                  <Link
-                    href="/auth"
-                    className="text-sm font-medium text-foreground hover:text-primary transition"
-                  >
+                  <AnimatedNavLink href="/auth">
                     Iniciar sesión
-                  </Link>
-                  <Link
-                    href="/onboarding"
-                    className="text-sm font-medium px-4 py-2 bg-primary text-primary-foreground rounded-xl shadow-sm hover:bg-primary/90 transition"
+                  </AnimatedNavLink>
+                  <AnimatedNavLink 
+                    href="/onboarding" 
+                    className="px-4 py-2 bg-primary text-primary-foreground rounded-xl shadow-sm hover:bg-primary/90 hover:text-primary-foreground"
                   >
                     Onboarding
-                  </Link>
+                  </AnimatedNavLink>
                 </>
               )}
             </div>
