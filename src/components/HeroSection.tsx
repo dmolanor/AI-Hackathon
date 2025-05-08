@@ -1,3 +1,4 @@
+// src/components/HeroSection.tsx
 import { buttonVariants } from '@/components/ui/button'; // Assuming shadcn button is here
 import Link from 'next/link';
 

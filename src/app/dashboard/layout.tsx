@@ -59,9 +59,9 @@ function SidebarLink({ href, icon, label, active = false }: SidebarLinkProps) {
           ? 'bg-primary/10 text-primary' 
           : 'text-muted-foreground hover:bg-secondary/10 hover:text-foreground'
       }`}
-    >
+      legacyBehavior>
       {icon}
       {label}
     </Link>
-  )
+  );
 } 

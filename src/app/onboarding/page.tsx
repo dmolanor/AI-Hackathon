@@ -259,7 +259,7 @@ export default function OnboardingPage() {
                 Anterior
               </button>
             ) : (
-              <div></div> // Espacio vacío para mantener el justify-between
+              (<div></div>) // Espacio vacío para mantener el justify-between
             )}
 
             {step < totalSteps ? (
@@ -295,5 +295,5 @@ export default function OnboardingPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

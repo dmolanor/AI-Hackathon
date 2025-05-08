@@ -83,7 +83,9 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    /* Removed border-border from here. Components should apply borders as needed. */
+    /* Outline color uses the ring color with opacity */
+    @apply outline-ring/50;
   }
   body {
     /* font-family is now set by .font-sans which uses --font-inter from layout.tsx via tailwind.config */

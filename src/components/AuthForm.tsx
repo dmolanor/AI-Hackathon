@@ -11,6 +11,9 @@ export default function AuthForm() {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [username, setUsername] = useState('');
   const [isLogin, setIsLogin] = useState(true)
   const [loading, setLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
@@ -33,26 +36,49 @@ export default function AuthForm() {
   //}
 
   async function handleSignup(e: React.FormEvent) {
-    e.preventDefault()
-    setLoading(true)
-    setErrorMsg(null)
-    
-    const supabase = createClient()
-    const { error } = await supabase.auth.signUp({ 
-      email, 
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    })
-    
-    setLoading(false)
-    
-    if (error) {
-      setErrorMsg(error.message)
-    } else {
-      // Para email confirmation
-      alert('Revisa tu email para confirmar tu cuenta')
+    e.preventDefault();
+    if (!firstName || !lastName || !username) {
+      setErrorMsg('Por favor, completa todos los campos requeridos.');
+      return;
+    }
+    setLoading(true);
+    setErrorMsg(null);
+
+    try {
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          email, 
+          password, 
+          firstName, 
+          lastName, 
+          username 
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        // Use error message from API response if available
+        setErrorMsg(result.error || `Error ${response.status}: ${response.statusText}`);
+      } else {
+        // Success!
+        alert(result.message || '¡Registro exitoso! Revisa tu correo electrónico para confirmar tu cuenta.');
+        setEmail('');
+        setPassword('');
+        setFirstName('');
+        setLastName('');
+        setUsername('');
+        setIsLogin(true); // Switch back to login view
+      }
+    } catch (error) {
+      console.error("Error calling signup API:", error);
+      setErrorMsg('Ocurrió un error inesperado al intentar registrarse.');
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -60,10 +86,8 @@ export default function AuthForm() {
     e.preventDefault()
     setLoading(true)
     setErrorMsg(null)
-    
     const supabase = createClient()
     const { error } = await supabase.auth.signInWithPassword({ email, password })
-    
     if (error) {
       setLoading(false)
       setErrorMsg(error.message)
@@ -94,10 +118,50 @@ export default function AuthForm() {
         )}
 
         <form onSubmit={isLogin ? handleLogin : handleSignup} className="space-y-5">
+          {!isLogin && (
+            <>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <label htmlFor="firstName" className="block text-sm font-medium text-foreground mb-1">Nombre(s)</label>
+                  <input
+                    id="firstName"
+                    type="text"
+                    placeholder="Tu nombre"
+                    value={firstName}
+                    onChange={e => setFirstName(e.target.value)}
+                    className="w-full p-3 border border-input rounded-xl bg-background focus:ring-2 focus:ring-primary focus:outline-none"
+                    required
+                  />
+                </div>
+                <div className="flex-1">
+                  <label htmlFor="lastName" className="block text-sm font-medium text-foreground mb-1">Apellido(s)</label>
+                  <input
+                    id="lastName"
+                    type="text"
+                    placeholder="Tus apellidos"
+                    value={lastName}
+                    onChange={e => setLastName(e.target.value)}
+                    className="w-full p-3 border border-input rounded-xl bg-background focus:ring-2 focus:ring-primary focus:outline-none"
+                    required
+                  />
+                </div>
+              </div>
+              <div>
+                <label htmlFor="username" className="block text-sm font-medium text-foreground mb-1">Nombre de usuario</label>
+                <input
+                  id="username"
+                  type="text"
+                  placeholder="Elige un nombre de usuario único"
+                  value={username}
+                  onChange={e => setUsername(e.target.value)}
+                  className="w-full p-3 border border-input rounded-xl bg-background focus:ring-2 focus:ring-primary focus:outline-none"
+                  required
+                />
+              </div>
+            </>
+          )}
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1">
-              Email
-            </label>
+            <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1">Email</label>
             <input
               id="email"
               type="email"
@@ -108,11 +172,8 @@ export default function AuthForm() {
               required
             />
           </div>
-          
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-foreground mb-1">
-              Contraseña
-            </label>
+            <label htmlFor="password" className="block text-sm font-medium text-foreground mb-1">Contraseña</label>
             <input
               id="password"
               type="password"
@@ -123,35 +184,27 @@ export default function AuthForm() {
               required
             />
           </div>
-          
           {isLogin && (
             <div className="text-right">
-              <Link 
-                href="/auth/reset-password" 
-                className="text-sm text-primary hover:underline"
-              >
+              <Link href="/auth/reset-password" className="text-sm text-primary hover:underline">
                 ¿Olvidaste tu contraseña?
               </Link>
             </div>
           )}
-          
-          <button 
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition font-medium"
-          >
+          <button type="submit" disabled={loading} className="w-full py-3 bg-primary text-primary-foreground rounded-xl hover:bg-primary/90 transition font-medium">
             {loading ? 'Procesando...' : isLogin ? 'Iniciar sesión' : 'Crear cuenta'}
           </button>
         </form>
         
         <div className="mt-6 text-center">
           <button
-            onClick={() => setIsLogin(!isLogin)}
+            onClick={() => {
+              setIsLogin(!isLogin);
+              setErrorMsg(null); // Clear errors when switching modes
+            }}
             className="text-primary hover:underline text-sm"
           >
-            {isLogin 
-              ? '¿No tienes cuenta? Regístrate' 
-              : '¿Ya tienes cuenta? Inicia sesión'}
+            {isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}
           </button>
         </div>
         

@@ -1,10 +1,10 @@
 // src/app/layout.tsx
-import AnimatedNavLink from '@/components/AnimatedNavLink'
-import { createClient } from '@/utils/supabase/server'
-import { Inter } from 'next/font/google'
-import Link from 'next/link'
-import React from 'react'
-import './globals.css'
+import Footer from '@/components/Footer';
+import Navbar from '@/components/Navbar';
+import { createClient } from '@/utils/supabase/server';
+import { Inter } from 'next/font/google';
+import React from 'react';
+import './globals.css';
 
 // Configure Inter font
 const inter = Inter({
@@ -13,6 +13,10 @@ const inter = Inter({
   variable: '--font-inter',
   weight: ['400', '600', '700']
 })
+
+// Calculate Navbar height approximation (py-3 translates roughly to h-12/h-14 depending on content/icons)
+// Let's use a safe value like 64px (16 * 4)
+const NAVBAR_HEIGHT_PX = 64;
 
 export default async function RootLayout({
   children,
@@ -26,89 +30,16 @@ export default async function RootLayout({
     <html lang="es" className={`${inter.variable}`}>
       <head />
       <body className="font-sans antialiased bg-background text-foreground flex flex-col min-h-screen">
-        <header className="w-full bg-background shadow-sm border-b border-border">
-          <nav className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <AnimatedNavLink href="/">
-              <span className="text-2xl font-bold text-primary">AI-First Reinventor</span>
-            </AnimatedNavLink>
-            <div className="flex items-center space-x-6">
-              {user ? (
-                <>
-                  <AnimatedNavLink href="/dashboard">
-                    Dashboard
-                  </AnimatedNavLink>
-                  <form action="/auth/signout" method="post" className="flex">
-                    <button 
-                      type="submit"
-                      className="text-sm font-medium text-foreground hover:text-primary transition-colors duration-200"
-                    >
-                      Cerrar sesión
-                    </button>
-                  </form>
-                </>
-              ) : (
-                <>
-                  <AnimatedNavLink href="/auth">
-                    Iniciar sesión
-                  </AnimatedNavLink>
-                  <AnimatedNavLink 
-                    href="/onboarding" 
-                    className="px-4 py-2 bg-primary text-primary-foreground rounded-xl shadow-sm hover:bg-primary/90 hover:text-primary-foreground"
-                  >
-                    Onboarding
-                  </AnimatedNavLink>
-                </>
-              )}
-            </div>
-          </nav>
-        </header>
-        <main className="flex-1">
+        <Navbar user={user} />
+        
+        <main 
+          className="flex-1 w-full"
+          style={{ paddingTop: `${NAVBAR_HEIGHT_PX}px` }}
+        >
           {children}
         </main>
-        <footer className="w-full bg-secondary/30 py-8 border-t border-border">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div>
-                <h3 className="text-lg font-semibold mb-4 text-primary">AI-First Reinventor</h3>
-                <p className="text-sm text-muted-foreground">
-                  Transformando carreras y creando oportunidades para emprendedores en la era de la IA.
-                </p>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold mb-4 text-primary">Enlaces</h3>
-                <ul className="space-y-2">
-                  <li>
-                    <Link href="/about" className="text-sm text-muted-foreground hover:text-primary transition">
-                      Acerca de
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/privacy" className="text-sm text-muted-foreground hover:text-primary transition">
-                      Privacidad
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/terms" className="text-sm text-muted-foreground hover:text-primary transition">
-                      Términos
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold mb-4 text-primary">Contacto</h3>
-                <p className="text-sm text-muted-foreground">
-                  ¿Preguntas o sugerencias? <br />
-                  <a href="mailto:info@ai-reinventor.com" className="text-primary hover:underline">
-                    info@ai-reinventor.com
-                  </a>
-                </p>
-              </div>
-            </div>
-            <div className="mt-8 pt-6 border-t border-border text-center text-sm text-muted-foreground">
-              © 2025 AI-First Reinventor. Todos los derechos reservados.
-            </div>
-          </div>
-        </footer>
+
+        <Footer />
       </body>
     </html>
   )
