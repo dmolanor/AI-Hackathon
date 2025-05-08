@@ -2,116 +2,46 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Inter font is now handled by next/font in layout.tsx */
-/* @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap'); */
-
-/* Remove or comment out @custom-variant dark if not explicitly using it yet, or ensure it aligns with new theme */
-/* @custom-variant dark (&:is(.dark *)); */
-
-/* The @theme inline block seems to be a VSCodium/VSCode specific feature for theme previewing
-   and might not be standard CSS. We will ensure variables are defined in :root and .dark.
-   The Tailwind config directly uses the hex codes for primary, secondary, foreground, muted, bg-alt.
-   The HSL variables here are for shadcn/ui components and should align or be distinct.
-*/
-
 :root {
-  /* Core Colors from heyfriends.studio (for reference, Tailwind uses these directly) */
-  /* primary: '#FF735C' */
-  /* secondary: '#5924FF' */
-  /* foreground: '#4A4A4A' */
-  /* muted: '#7A7A7A' */
-  /* bg-alt: '#F9F9FB' */
+  /* Color roles en H S L para hsl(var(--...)) */
+  --background: 27.27 45.83% 90.59%;          /* #F2E6DC */
+  --foreground: 148.8 28.09% 17.45%;          /* #20392C */
 
-  /* Shadcn/ui compatible variables - these should be derived from the new palette */
-  /* For simplicity, let's set background and foreground first, then map others */
-  --background: 255 255 255; /* White background */
-  --foreground: 74 74 74;    /* #4A4A4A */
+  --primary: 148.8 28.09% 17.45%;             /* #20392C */
+  --primary-foreground: 0 0% 100%;            /* #FFFFFF */
 
-  --card: 255 255 255;
-  --card-foreground: var(--foreground);
-  --popover: 255 255 255;
-  --popover-foreground: var(--foreground);
+  --secondary: 220.8 100% 90.2%;              /* #CDDDFF */
+  --secondary-foreground: 148.8 28.09% 17.45%; /* #20392C */
 
-  --primary: 255 115 92; /* #FF735C */
-  --primary-foreground: 255 255 255; /* White text on primary */
+  --muted: 98.18 5.26% 59.02%;                /* #959C91 */
+  --muted-foreground: 37.5 36.36% 95.69%;     /* #F8F5F0 */
 
-  --secondary: 89 36 255; /* #5924FF */
-  --secondary-foreground: 255 255 255; /* White text on secondary */
+  /* Destructivo y acento (igual a secondary) */
+  --accent: 220.8 100% 90.2%;                 /* #CDDDFF */
+  --accent-foreground: 148.8 28.09% 17.45%;    /* #20392C */
+  --destructive: 0 100% 50%;                  /* rojo puro */
+  --destructive-foreground: 0 0% 100%;         /* #FFFFFF */
 
-  --muted: 122 122 122;     /* #7A7A7A */
-  --muted-foreground: 249 249 251; /* bg-alt as text on muted, or a lighter gray */
+  /* Otros roles usados por componentes de shadcn/ui */
+  --card: 0 0% 100%;                          /* #FFFFFF */
+  --card-foreground: 148.8 28.09% 17.45%;     /* #20392C */
+  --popover: 0 0% 100%;                       /* #FFFFFF */
+  --popover-foreground: 148.8 28.09% 17.45%;  /* #20392C */
 
-  --accent: var(--secondary); /* Use secondary as accent for now */
-  --accent-foreground: var(--secondary-foreground);
+  /* Ajustes de borde e input (pueden coincidir con bg-alt) */
+  --border: 37.5 36.36% 95.69%;               /* #F8F5F0 */
+  --input: 37.5 36.36% 95.69%;                /* #F8F5F0 */
+  --ring: 148.8 28.09% 17.45%;                /* #20392C */
 
-  --destructive: 0 0 0; /* Define a destructive color, e.g., a red */
-  /* --destructive-foreground: 255 255 255; */
-
-  --border: 229 229 231; /* A light gray for borders, e.g., from bg-alt slightly darker */
-  --input: 229 229 231;  /* Similar to border */
-  --ring: var(--primary);    /* Use primary for focus rings */
-
-  --radius: 0.625rem; /* Kept from original, adjust if needed */
-  
-  /* bg-alt is #F9F9FB, which is oklch(0.988 0.002 296.9) or approx 249 249 251 */
-  /* This can be an alternative background for sections, not a CSS var here unless needed by a component */
+  --radius: 0.625rem;
 }
 
-/* Remove the .dark theme for now unless specifically requested by heyfriends.studio design */
-/* 
-.dark {
-  --background: oklch(0.129 0.042 264.695);
-  --foreground: oklch(0.984 0.003 247.858);
-  --card: oklch(0.208 0.042 265.755);
-  --card-foreground: oklch(0.984 0.003 247.858);
-  --popover: oklch(0.208 0.042 265.755);
-  --popover-foreground: oklch(0.984 0.003 247.858);
-  --primary: oklch(0.929 0.013 255.508);
-  --primary-foreground: oklch(0.208 0.042 265.755);
-  --secondary: oklch(0.279 0.041 260.031);
-  --secondary-foreground: oklch(0.984 0.003 247.858);
-  --muted: oklch(0.279 0.041 260.031);
-  --muted-foreground: oklch(0.704 0.04 256.788);
-  --accent: oklch(0.279 0.041 260.031);
-  --accent-foreground: oklch(0.984 0.003 247.858);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.551 0.027 264.364);
-}
-*/
-
-@layer base {
-  * {
-    /* Removed border-border from here. Components should apply borders as needed. */
-    /* Outline color uses the ring color with opacity */
-    @apply outline-ring/50;
-  }
-  body {
-    /* font-family is now set by .font-sans which uses --font-inter from layout.tsx via tailwind.config */
-    @apply bg-background text-foreground;
-  }
-  /* Ensure h1, h2, etc. use the Inter font by default if not already covered by body .font-sans */
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-sans;
-  }
-}
-
-/* Custom animation for FeatureGrid */
+/* Animaciones personalizadas */
 @keyframes fade-in-up {
-  0% {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
-/* Animation for SVG underline */
 @keyframes draw-line {
-  to {
-    stroke-dashoffset: 0;
-  }
+  to { stroke-dashoffset: 0; }
 }

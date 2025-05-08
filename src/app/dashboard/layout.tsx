@@ -1,5 +1,8 @@
 // src/app/dashboard/layout.tsx
-import { BookOpen, Grid, Home, LifeBuoy, LogOut, Settings, User, Users } from 'lucide-react';
+import {
+  BookOpen, Grid, Home, LifeBuoy,
+  LogOut, Settings, User, Users
+} from 'lucide-react';
 import Link from 'next/link';
 import { ReactNode } from 'react';
 
@@ -18,7 +21,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           <SidebarLink href="/dashboard/community" icon={<Users size={18} />} label="Comunidad" />
           <SidebarLink href="/dashboard/settings" icon={<Settings size={18} />} label="Configuración" />
           <SidebarLink href="/dashboard/help" icon={<LifeBuoy size={18} />} label="Ayuda" />
-          
           <div className="pt-8 mt-8 border-t border-border">
             <SidebarLink href="/auth/logout" icon={<LogOut size={18} />} label="Cerrar sesión" />
           </div>
@@ -40,7 +42,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         {children}
       </main>
     </div>
-  )
+  );
 }
 
 interface SidebarLinkProps {
@@ -54,14 +56,18 @@ function SidebarLink({ href, icon, label, active = false }: SidebarLinkProps) {
   return (
     <Link
       href={href}
-      className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium ${
-        active 
+      className={`
+        flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors
+        ${active 
           ? 'bg-primary/10 text-primary' 
-          : 'text-muted-foreground hover:bg-secondary/10 hover:text-foreground'
-      }`}
-      legacyBehavior>
-      {icon}
-      {label}
+          : 'text-muted-foreground hover:bg-secondary/10 hover:text-foreground'}
+      `}
+    >
+      {/* Único hijo de <Link> */}
+      <span className="flex items-center gap-3">
+        {icon}
+        {label}
+      </span>
     </Link>
   );
-} 
+}

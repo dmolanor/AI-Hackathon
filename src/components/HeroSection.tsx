@@ -1,5 +1,5 @@
 // src/components/HeroSection.tsx
-import { buttonVariants } from '@/components/ui/button'; // Assuming shadcn button is here
+import { buttonVariants } from '@/components/ui/button';
 import Link from 'next/link';
 
 export default function HeroSection() {
@@ -12,18 +12,28 @@ export default function HeroSection() {
           Emprende con IA
         </h1>
         <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-          <Link href="/pricing" legacyBehavior passHref>
-            <a className={buttonVariants({ size: 'lg' }) + ' bg-primary text-primary-foreground hover:bg-primary/90'}>
-              Ver Precios
-            </a>
+          {/* Único hijo de <Link>: un <span> que agrupa texto y estilos */}
+          <Link
+            href="/pricing"
+            className={
+              buttonVariants({ size: 'lg' }) +
+              ' bg-primary text-primary-foreground hover:bg-primary/90'
+            }
+          >
+            <span>Ver Precios</span>
           </Link>
-          <Link href="/video" legacyBehavior passHref>
-            <a className={buttonVariants({ variant: 'outline', size: 'lg' }) + ' border-primary text-primary hover:bg-primary/10'}>
-              Ver Video
-            </a>
+
+          <Link
+            href="/video"
+            className={
+              buttonVariants({ variant: 'outline', size: 'lg' }) +
+              ' border-primary text-primary hover:bg-primary/10'
+            }
+          >
+            <span>Ver Video</span>
           </Link>
         </div>
       </div>
     </section>
   );
-} 
+}
