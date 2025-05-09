@@ -1,15 +1,43 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+// src/app/api/user/profile/route.ts
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
-  const cookieStore = cookies();
-  const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+  const cookieStore = await cookies();
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value;
+        },
+        set(name: string, value: string, options: CookieOptions) {
+          try {
+            cookieStore.set(name, value, options);
+          } catch (_error) {
+            // The `set` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing user sessions.
+          }
+        },
+        remove(name: string, options: CookieOptions) {
+          try {
+            cookieStore.set(name, "", options);
+          } catch (_error) {
+            // The `remove` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing user sessions.
+          }
+        },
+      },
+    }
+  );
 
   try {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
-    console.log('API /api/user/profile: User from cookie:', user);
-    console.log('API /api/user/profile: Error from getUser:', userError);
+    console.log('API /api/user/profile (using ssr): User from cookie:', user);
+    console.log('API /api/user/profile (using ssr): Error from getUser:', userError);
 
     if (userError || !user) {
       console.error('Error fetching user or no user:', userError);
@@ -25,25 +53,9 @@ export async function GET() {
         city,
         age,
         cv_url,
-        linkedin_url,
-        passion_aligns_work,
-        goals_if_no_money,
-        definition_of_success,
-        industry,
-        problem_to_solve,
-        business_type,
-        passion_project_description,
-        time_management,
-        communication_sales,
-        leadership,
-        financial_knowledge,
-        digital_skills,
-        problem_solving,
-        learning_investment,
-        education_level,
-        skills_to_develop
+        linkedin_url
       `)
-      .eq('user_id', user.id)
+      .eq('id', user.id)
       .single();
 
     if (profileError) {
@@ -130,8 +142,36 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
-  const cookieStore = cookies();
-  const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+  const cookieStore = await cookies();
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value;
+        },
+        set(name: string, value: string, options: CookieOptions) {
+          try {
+            cookieStore.set(name, value, options);
+          } catch (_error) {
+            // The `set` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing user sessions.
+          }
+        },
+        remove(name: string, options: CookieOptions) {
+          try {
+            cookieStore.set(name, "", options);
+          } catch (_error) {
+            // The `remove` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing user sessions.
+          }
+        },
+      },
+    }
+  );
+
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
@@ -176,7 +216,7 @@ export async function PUT(request: Request) {
         const { data, error } = await supabase
             .from('user_profiles')
             .update(filteredProfileUpdates)
-            .eq('user_id', user.id)
+            .eq('id', user.id)
             .select()
             .single();
         profileUpdateError = error;
@@ -186,7 +226,7 @@ export async function PUT(request: Request) {
         const { data, error } = await supabase
             .from('user_profiles')
             .select('*')
-            .eq('user_id', user.id)
+            .eq('id', user.id)
             .single();
         profileUpdateError = error; // This could be an error if profile doesn't exist
         updatedProfileData = data;

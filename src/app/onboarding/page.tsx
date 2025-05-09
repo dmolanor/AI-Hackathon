@@ -142,7 +142,7 @@ export default function OnboardingPage() {
 
       // Datos del test
       const testData = {
-        user_id: user.id,
+        id: user.id,
         // Copiamos los datos del test desde formData, excluyendo los datos de perfil
         responsibility: formData.responsibility,
         openness: formData.openness,

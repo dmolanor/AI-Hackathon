@@ -64,8 +64,8 @@ export default async function DashboardPage() {
   }
 
   // En el futuro podrías obtener estos datos desde Supabase
-  // const { data: paths } = await supabase.from('learning_paths').select('*').eq('user_id', user.id)
-  // const { data: cofounders } = await supabase.from('cofounder_matches').select('*').eq('user_id', user.id)
+  // const { data: paths } = await supabase.from('learning_paths').select('*').eq('id', user.id)
+  // const { data: cofounders } = await supabase.from('cofounder_matches').select('*').eq('id', user.id)
 
   return (
     <DashboardClient 
