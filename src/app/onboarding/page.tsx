@@ -317,7 +317,7 @@ export default function OnboardingPage() {
                 <ArrowRight className="ml-2 h-4 w-4" />
               </button>
             ) : (
-              <button
+        <button
                 type="button"
                 onClick={saveToSupabase}
                 disabled={loading}
@@ -334,7 +334,7 @@ export default function OnboardingPage() {
                     Completar
                   </>
                 )}
-              </button>
+        </button>
             )}
           </div>
         </div>
