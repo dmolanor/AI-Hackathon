@@ -125,50 +125,94 @@ export default function OnboardingPage() {
   const prevStep = () => setStep(prev => prev - 1);
 
   const saveToSupabase = async () => {
-    try {
-      if (!user) return;
-      setLoading(true);
+    if (!user) {
+      alert('Error: Usuario no autenticado.');
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
 
-      // Datos del perfil
-      const profileData = {
-        id: user.id,
-        full_name: user.user_metadata?.full_name || '',
-        age: formData.age,
+    try {
+      // Prepare profileUpdates from formData
+      const profileUpdates = {
+        full_name: formData.full_name,
+        age: formData.age ? parseInt(formData.age, 10) : undefined, // Ensure age is a number or undefined
         country: formData.country,
         city: formData.city,
         cv_url: formData.cv_url,
         linkedin_url: formData.linkedin_url,
+        // username: user.email, // Or derive from full_name if needed, ensure it's set if required by profile table
       };
 
-      // Datos del test
-      const testData = {
-        id: user.id,
-        // Copiamos los datos del test desde formData, excluyendo los datos de perfil
+      // Prepare testAnswers from formData
+      const testAnswers = {
         responsibility: formData.responsibility,
         openness: formData.openness,
-        // ...resto de campos del test
-        // (omitidos por brevedad, pero incluiría todos los campos del test)
+        autonomy: formData.autonomy,
+        risk_tolerance: formData.risk_tolerance,
+        grit: formData.grit,
+        action_orientation: formData.action_orientation,
+        emotional_stability: formData.emotional_stability,
+        perseverance_experience: formData.perseverance_experience,
+        work_experience: formData.work_experience,
+        entrepreneurial_experience: formData.entrepreneurial_experience,
+        leadership_experience: formData.leadership_experience,
+        family_entrepreneurship: formData.family_entrepreneurship,
+        entrepreneurship_description: formData.entrepreneurship_description,
+        entrepreneurship_obstacles: formData.entrepreneurship_obstacles,
+        time_management: formData.time_management,
+        communication_sales: formData.communication_sales,
+        leadership: formData.leadership, // Note: 'leadership' is distinct from 'leadership_experience'
+        financial_knowledge: formData.financial_knowledge,
+        digital_skills: formData.digital_skills,
+        problem_solving: formData.problem_solving,
+        learning_investment: formData.learning_investment,
+        continuous_learning: formData.continuous_learning,
+        tech_learning_capability: formData.tech_learning_capability,
+        education_level: formData.education_level,
+        skills_to_develop: formData.skills_to_develop,
+        business_format: formData.business_format,
+        current_goal: formData.current_goal,
+        entrepreneurial_intention: formData.entrepreneurial_intention,
+        interest_areas: formData.interest_areas, // Ensure this is an array of strings
+        geographic_flexibility: formData.geographic_flexibility,
+        ai_impact: formData.ai_impact,
+        dream_business_description: formData.dream_business_description,
+        main_motivation: formData.main_motivation,
+        uncertainty_comfort: formData.uncertainty_comfort,
+        family_support: formData.family_support,
+        available_resources: formData.available_resources,
+        failure_resilience: formData.failure_resilience,
+        optimism: formData.optimism,
+        additional_information: formData.additional_information,
       };
 
-      // Guardar perfil
-      const { error: profileError } = await supabase
-        .from('user_profiles')
-        .upsert(profileData, { onConflict: 'id' });
+      const payload = {
+        userId: user.id,
+        profileUpdates,
+        testAnswers,
+      };
 
-      if (profileError) throw profileError;
+      const response = await fetch('/api/onboarding', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
 
-      // Guardar test
-      const { error: testError } = await supabase
-        .from('entrepreneurial_tests')
-        .insert(testData);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
+      }
 
-      if (testError) throw testError;
+      // const result = await response.json(); // Optional: if you need to use the result
+      // console.log('Onboarding data saved:', result);
 
-      // Redirigir al dashboard tras completar
-      router.push('/dashboard');
+      router.push('/dashboard'); // Redirect after successful submission
     } catch (error) {
-      console.error('Error al guardar datos:', error);
-      alert('Se produjo un error al guardar tus datos. Por favor, inténtalo de nuevo.');
+      console.error('Error al guardar datos de onboarding:', error);
+      alert(`Se produjo un error al guardar tus datos: ${error instanceof Error ? error.message : 'Error desconocido'}`);
     } finally {
       setLoading(false);
     }

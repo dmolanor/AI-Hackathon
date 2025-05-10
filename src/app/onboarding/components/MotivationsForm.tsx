@@ -20,12 +20,12 @@ export default function MotivationsForm({ formData, updateForm }: MotivationsFor
         </label>
         <div className="grid grid-cols-1 gap-2">
           {[
-            { value: 'financial_independence', label: 'Quiero independencia financiera (ser mi propio jefe y mejorar mis ingresos).' },
-            { value: 'passion', label: 'Identifiqué una pasión o idea que deseo hacer realidad.' },
-            { value: 'flexibility', label: 'Busco flexibilidad y balance trabajo-vida que un empleo tradicional no me da.' },
-            { value: 'impact', label: 'Quiero generar un impacto positivo en la sociedad o mi comunidad.' },
-            { value: 'necessity', label: 'Necesidad: mi situación laboral/económica actual me empuja a buscar alternativas.' },
-            { value: 'other', label: 'Otro (especificar en la pregunta final).' }
+            { value: 'independencia_financiera', label: 'Quiero independencia financiera (ser mi propio jefe y mejorar mis ingresos).' },
+            { value: 'pasion_idea', label: 'Identifiqué una pasión o idea que deseo hacer realidad.' },
+            { value: 'flexibilidad', label: 'Busco flexibilidad y balance trabajo-vida que un empleo tradicional no me da.' },
+            { value: 'impacto_social', label: 'Quiero generar un impacto positivo en la sociedad o mi comunidad.' },
+            { value: 'necesidad', label: 'Necesidad: mi situación laboral/económica actual me empuja a buscar alternativas.' },
+            { value: 'otro', label: 'Otro (especificar en la pregunta final).' }
           ].map((option) => (
             <label key={option.value} className="flex items-center p-3 border border-input rounded-xl cursor-pointer hover:bg-secondary/10 transition">
               <input

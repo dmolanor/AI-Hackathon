@@ -4,8 +4,8 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
+  // await the cookies store before using it
   const cookieStore = await cookies();
-
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -16,18 +16,16 @@ export async function GET() {
         },
         set(name: string, value: string, options: CookieOptions) {
           try {
-            cookieStore.set(name, value, options);
-          } catch (_error) {
-            // The `set` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing user sessions.
+            cookieStore.set({ name, value, ...options });
+          } catch {
+            // ignore in server component context
           }
         },
         remove(name: string, options: CookieOptions) {
           try {
-            cookieStore.set(name, "", options);
-          } catch (_error) {
-            // The `remove` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing user sessions.
+            cookieStore.set({ name, value: '', ...options });
+          } catch {
+            // ignore in server component context
           }
         },
       },
@@ -36,11 +34,7 @@ export async function GET() {
 
   try {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
-    console.log('API /api/user/profile (using ssr): User from cookie:', user);
-    console.log('API /api/user/profile (using ssr): Error from getUser:', userError);
-
     if (userError || !user) {
-      console.error('Error fetching user or no user:', userError);
       return NextResponse.json({ error: 'Not authorized or user not found' }, { status: 401 });
     }
 
@@ -59,7 +53,6 @@ export async function GET() {
       .single();
 
     if (profileError) {
-      console.error('Error fetching profile data:', profileError);
       if (profileError.code === 'PGRST116') {
         return NextResponse.json({
           id: user.id,
@@ -94,7 +87,6 @@ export async function GET() {
     }
 
     if (!profileData) {
-      console.warn('Profile data not found (profileData is null after error checks), returning default structure.');
       return NextResponse.json({
         id: user.id,
         email: user.email,
@@ -135,15 +127,13 @@ export async function GET() {
     return NextResponse.json(userProfile, { status: 200 });
 
   } catch (error) {
-    console.error('Unexpected error in GET /api/user/profile:', error);
-    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
-    return NextResponse.json({ error: 'An unexpected error occurred', details: errorMessage }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'An unexpected error occurred';
+    return NextResponse.json({ error: 'Unexpected error', details: message }, { status: 500 });
   }
 }
 
 export async function PUT(request: Request) {
   const cookieStore = await cookies();
-
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -154,18 +144,16 @@ export async function PUT(request: Request) {
         },
         set(name: string, value: string, options: CookieOptions) {
           try {
-            cookieStore.set(name, value, options);
-          } catch (_error) {
-            // The `set` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing user sessions.
+            cookieStore.set({ name, value, ...options });
+          } catch {
+            // ignore in server component
           }
         },
         remove(name: string, options: CookieOptions) {
           try {
-            cookieStore.set(name, "", options);
-          } catch (_error) {
-            // The `remove` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing user sessions.
+            cookieStore.set({ name, value: '', ...options });
+          } catch {
+            // ignore in server component
           }
         },
       },
@@ -173,86 +161,74 @@ export async function PUT(request: Request) {
   );
 
   const { data: { user } } = await supabase.auth.getUser();
-
   if (!user) {
     return NextResponse.json({ error: 'Not authorized' }, { status: 401 });
   }
 
   try {
     const updatedData = await request.json();
-    
     const { phone, ...profileUpdates } = updatedData;
 
-    let authUpdateError = null;
-    if (phone !== undefined && phone !== user.phone) { 
-        const { error } = await supabase.auth.updateUser({ phone });
-        authUpdateError = error;
+    // handle phone update
+    let authErr = null;
+    if (phone !== undefined && phone !== user.phone) {
+      const { error } = await supabase.auth.updateUser({ phone });
+      authErr = error;
     }
-    
-    if (profileUpdates.username) delete profileUpdates.username;
-    if (profileUpdates.email) delete profileUpdates.email;
 
-    // Ensure only actual profile fields are passed to update
-    const allowedProfileFields = [
-      'full_name', 'country', 'city', 'age', 'cv_url', 'linkedin_url',
-      'passion_aligns_work', 'goals_if_no_money', 'definition_of_success',
-      'industry', 'problem_to_solve', 'business_type', 'passion_project_description',
-      'time_management', 'communication_sales', 'leadership', 'financial_knowledge',
-      'digital_skills', 'problem_solving', 'learning_investment', 'education_level',
+    // filter allowed fields
+    const allowed = [
+      'full_name','country','city','age','cv_url','linkedin_url',
+      'passion_aligns_work','goals_if_no_money','definition_of_success',
+      'industry','problem_to_solve','business_type','passion_project_description',
+      'time_management','communication_sales','leadership','financial_knowledge',
+      'digital_skills','problem_solving','learning_investment','education_level',
       'skills_to_develop'
     ];
-    
-    const filteredProfileUpdates: { [key: string]: string | number | boolean | null } = {};
-    for (const key of allowedProfileFields) {
-      if (profileUpdates[key] !== undefined) {
-        filteredProfileUpdates[key] = profileUpdates[key];
-      }
+    const updates: Record<string, any> = {};
+    for (const k of allowed) {
+      if (profileUpdates[k] !== undefined) updates[k] = profileUpdates[k];
     }
 
-    let profileUpdateError = null;
-    let updatedProfileData = null;
+    let profileData = null;
+    let profileErr = null;
 
-    if (Object.keys(filteredProfileUpdates).length > 0) {
-        const { data, error } = await supabase
-            .from('user_profiles')
-            .update(filteredProfileUpdates)
-            .eq('id', user.id)
-            .select()
-            .single();
-        profileUpdateError = error;
-        updatedProfileData = data;
+    if (Object.keys(updates).length) {
+      const res = await supabase
+        .from('user_profiles')
+        .update(updates)
+        .eq('id', user.id)
+        .select()
+        .single();
+      profileData = res.data;
+      profileErr = res.error;
     } else {
-        // If only phone was updated, fetch current profile to return consistent data
-        const { data, error } = await supabase
-            .from('user_profiles')
-            .select('*')
-            .eq('id', user.id)
-            .single();
-        profileUpdateError = error; // This could be an error if profile doesn't exist
-        updatedProfileData = data;
+      const res = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      profileData = res.data;
+      profileErr = res.error;
     }
 
-    if (authUpdateError || profileUpdateError) {
-      console.error('Error updating profile:', { authUpdateError, profileUpdateError });
-      const errors = [];
-      if (authUpdateError) errors.push(`Auth update error: ${authUpdateError.message}`);
-      if (profileUpdateError) errors.push(`Profile update error: ${profileUpdateError.message}`);
-      return NextResponse.json({ error: 'Failed to update profile', details: errors.join('; ') }, { status: 500 });
+    if (authErr || profileErr) {
+      const details = [
+        authErr?.message && `Auth error: ${authErr.message}`,
+        profileErr?.message && `Profile error: ${profileErr.message}`,
+      ].filter(Boolean).join('; ');
+      return NextResponse.json({ error: 'Failed to update profile', details }, { status: 500 });
     }
-    
-    // Combine results: if profile was updated, use that, otherwise use existing profile data
-    // with potentially updated auth info (like phone, which Supabase handles directly on user object)
-    const finalUserData = {
-        id: user.id,
-        email: user.email, // Email doesn't change here
-        phone: phone !== undefined ? phone : user.phone, // Reflect new phone if updated
-        ...(updatedProfileData || {}), // Spread the profile data
-    };
 
-    return NextResponse.json(finalUserData, { status: 200 });
+    return NextResponse.json({
+      id: user.id,
+      email: user.email,
+      phone: phone ?? user.phone,
+      ...(profileData || {})
+    }, { status: 200 });
+
   } catch (error) {
-    console.error('Error processing PUT /api/user/profile:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Invalid request data or unexpected error';
-    return NextResponse.json({ error: 'Invalid request data or unexpected error', details: errorMessage }, { status: 400 });
+    const message = error instanceof Error ? error.message : 'Invalid request data';
+    return NextResponse.json({ error: 'Unexpected error', details: message }, { status: 400 });
   }
-} 
+}

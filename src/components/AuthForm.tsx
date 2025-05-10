@@ -37,8 +37,8 @@ export default function AuthForm() {
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
-    if (!firstName || !lastName || !username) {
-      setErrorMsg('Por favor, completa todos los campos requeridos.');
+    if (!isLogin && (!firstName || !lastName || !username)) { 
+      setErrorMsg('Por favor, completa todos los campos requeridos para el registro.');
       return;
     }
     setLoading(true);
@@ -62,45 +62,69 @@ export default function AuthForm() {
       const result = await response.json();
 
       if (!response.ok) {
-        // Use error message from API response if available
-        setErrorMsg(result.error || `Error ${response.status}: ${response.statusText}`);
+        setErrorMsg(result.error || 'Error en el registro.');
       } else {
-        // Success!
-        alert(result.message || '¡Registro exitoso! Revisa tu correo electrónico para confirmar tu cuenta.');
+        alert(result.message || '¡Registro exitoso! Revisa tu email.');
+        // Clear form and switch to login view
         setEmail('');
         setPassword('');
         setFirstName('');
         setLastName('');
         setUsername('');
-        setIsLogin(true); // Switch back to login view
+        setIsLogin(true); 
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error calling signup API:", error);
-      setErrorMsg('Ocurrió un error inesperado al intentar registrarse.');
+      setErrorMsg(error.message || 'Error inesperado.');
     } finally {
       setLoading(false);
     }
   }
 
   async function handleLogin(e: React.FormEvent) {
-    e.preventDefault()
-    setLoading(true)
-    setErrorMsg(null)
-    const supabase = createClient()
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+    e.preventDefault();
+    setLoading(true);
+    setErrorMsg(null);
+    const supabase = createClient();
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
     if (error) {
-      setLoading(false)
-      setErrorMsg(error.message)
-    } else if (data.session) {
-      console.log('Login successful, session object:', data.session);
-      console.log('User object:', data.user);
-      // router.refresh() // Keep this if you want to try, but window.location.assign will override
-      // router.push('/dashboard')
-      window.location.assign('/dashboard'); // Force a full page load to sync server session state
+      setLoading(false);
+      setErrorMsg(error.message);
+    } else if (data.user) { 
+      try {
+        const { data: profile, error: profileError } = await supabase
+          .from('user_profiles')
+          .select('onboarding_completed')
+          .eq('id', data.user.id)
+          .single();
+
+        if (profileError && profileError.code !== 'PGRST116') {
+          console.error('Error fetching profile for login redirect:', profileError.message);
+          // If there's an unexpected error fetching the profile, it's safer to halt and show an error
+          // than to redirect incorrectly. User can try again.
+          setErrorMsg(`Error al verificar tu perfil: ${profileError.message}. Intenta de nuevo.`);
+          setLoading(false);
+          return;
+        }
+
+        if (profile && profile.onboarding_completed) {
+          window.location.assign('/dashboard');
+        } else {
+          // If profile.onboarding_completed is false, or profile is null (due to PGRST116 - new user),
+          // or profile fetch had PGRST116 (user exists, profile does not yet - race condition possible)
+          window.location.assign('/onboarding');
+        }
+      } catch (profileCatchError: any) {
+        console.error('Exception while fetching profile or redirecting post-login:', profileCatchError);
+        setErrorMsg(`Error al procesar tu inicio de sesión: ${profileCatchError.message || 'Error desconocido'}. Intenta de nuevo.`);
+        setLoading(false);
+      }
+      // setLoading(false) is often not reached if window.location.assign occurs,
+      // but placed here for paths that might not redirect (e.g., error display paths).
     } else {
-      // No session, no user, handle this case
-      setLoading(false); // Ensure loading is stopped
-      setErrorMsg("No se pudo iniciar sesión. Sesión no encontrada después del intento.");
+      setLoading(false);
+      setErrorMsg("No se pudo iniciar sesión. Verifica tus credenciales o el estado de tu cuenta.");
     }
   }
 
@@ -137,7 +161,7 @@ export default function AuthForm() {
                     value={firstName}
                     onChange={e => setFirstName(e.target.value)}
                     className="w-full p-3 border border-input rounded-xl bg-background focus:ring-2 focus:ring-primary focus:outline-none"
-                    required
+                    required={!isLogin} 
                   />
                 </div>
                 <div className="flex-1">
@@ -149,7 +173,7 @@ export default function AuthForm() {
                     value={lastName}
                     onChange={e => setLastName(e.target.value)}
                     className="w-full p-3 border border-input rounded-xl bg-background focus:ring-2 focus:ring-primary focus:outline-none"
-                    required
+                    required={!isLogin} 
                   />
                 </div>
               </div>
@@ -162,7 +186,7 @@ export default function AuthForm() {
                   value={username}
                   onChange={e => setUsername(e.target.value)}
                   className="w-full p-3 border border-input rounded-xl bg-background focus:ring-2 focus:ring-primary focus:outline-none"
-                  required
+                  required={!isLogin} 
                 />
               </div>
             </>
@@ -207,7 +231,7 @@ export default function AuthForm() {
           <button
             onClick={() => {
               setIsLogin(!isLogin);
-              setErrorMsg(null); // Clear errors when switching modes
+              setErrorMsg(null); 
             }}
             className="text-primary hover:underline text-sm"
           >

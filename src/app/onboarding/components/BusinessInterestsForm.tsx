@@ -55,10 +55,10 @@ export default function BusinessInterestsForm({ formData, updateForm }: Business
         </label>
         <div className="grid grid-cols-1 gap-2">
           {[
-            { value: 'professional_growth', label: 'Crecer profesionalmente dentro de una empresa o carrera empleada.' },
-            { value: 'own_business', label: 'Lanzar y hacer crecer mi propio emprendimiento.' },
-            { value: 'hybrid', label: 'Compatibilizar mi empleo actual con un emprendimiento en paralelo.' },
-            { value: 'exploring', label: 'Explorar opciones; aún no lo tengo claro.' }
+            { value: 'empleado', label: 'Crecer profesionalmente dentro de una empresa o carrera empleada.' },
+            { value: 'emprender_full', label: 'Lanzar y hacer crecer mi propio emprendimiento.' },
+            { value: 'emprender_paralelo', label: 'Compatibilizar mi empleo actual con un emprendimiento en paralelo.' },
+            { value: 'explorando', label: 'Explorar opciones; aún no lo tengo claro.' }
           ].map((option) => (
             <label key={option.value} className="flex items-center p-3 border border-input rounded-xl cursor-pointer hover:bg-secondary/10 transition">
               <input

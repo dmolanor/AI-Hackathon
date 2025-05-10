@@ -19,10 +19,10 @@ export default function WorkExperienceForm({ formData, updateForm }: WorkExperie
         </label>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
           {[
-            { value: '0', label: '0 años' },
-            { value: '1-3', label: '1-3 años' },
-            { value: '4-10', label: '4-10 años' },
-            { value: '10+', label: '10+ años' }
+            { value: '0_anos', label: '0 años' },
+            { value: '1_3_anos', label: '1-3 años' },
+            { value: '4_10_anos', label: '4-10 años' },
+            { value: 'mas_10_anos', label: '10+ años' }
           ].map((option) => (
             <label key={option.value} className="flex items-center p-3 border border-input rounded-xl cursor-pointer hover:bg-secondary/10 transition">
               <input
@@ -40,12 +40,14 @@ export default function WorkExperienceForm({ formData, updateForm }: WorkExperie
       
       <div>
         <label className="block text-sm font-medium text-foreground mb-2">
-          ¿Has iniciado o gestionado alguna vez un negocio propio o proyecto emprendedor?
+          ¿Cuál de las siguientes opciones describe mejor tu experiencia emprendedora?
         </label>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           {[
-            { value: 'yes', label: 'Sí' },
-            { value: 'no', label: 'No' }
+            { value: 'ninguna', label: 'Ninguna, nunca he emprendido.' },
+            { value: 'iniciado_fracaso', label: 'He iniciado alguno(s) pero fracasaron o los abandoné.' },
+            { value: 'iniciado_activo', label: 'Tengo uno o más emprendimientos activos actualmente.' },
+            { value: 'multiples', label: 'He tenido múltiples emprendimientos (exitosos y/o fracasos).' }
           ].map((option) => (
             <label key={option.value} className="flex items-center p-3 border border-input rounded-xl cursor-pointer hover:bg-secondary/10 transition">
               <input
@@ -109,13 +111,13 @@ export default function WorkExperienceForm({ formData, updateForm }: WorkExperie
         </div>
       </div>
       
-      {formData.entrepreneurial_experience === 'yes' ? (
+      {formData.entrepreneurial_experience !== 'ninguna' ? (
         <div>
           <label className="block text-sm font-medium text-foreground mb-2">
-            Describe brevemente tu emprendimiento más reciente (o actual). ¿De qué se trataba y qué aprendiste de esa experiencia?
+            Describe brevemente tu emprendimiento más significativo (o actual). ¿De qué se trataba y qué aprendiste de esa experiencia?
           </label>
           <textarea
-            value={formData.entrepreneurship_description}
+            value={formData.entrepreneurship_description || ''}
             onChange={(e) => updateForm('entrepreneurship_description', e.target.value)}
             placeholder="Comparte tu experiencia emprendedora..."
             className="w-full p-3 border border-input rounded-xl bg-background min-h-[120px] focus:ring-2 focus:ring-primary focus:outline-none"
@@ -124,10 +126,10 @@ export default function WorkExperienceForm({ formData, updateForm }: WorkExperie
       ) : (
         <div>
           <label className="block text-sm font-medium text-foreground mb-2">
-            ¿Hay alguna razón en particular por la que no has emprendido todavía (por ejemplo, falta de tiempo, capital, conocimientos, aversión al riesgo)? Explica brevemente.
+            Si no has emprendido, ¿hay alguna razón en particular (por ejemplo, falta de tiempo, capital, conocimientos, aversión al riesgo)? Explica brevemente.
           </label>
           <textarea
-            value={formData.entrepreneurship_obstacles}
+            value={formData.entrepreneurship_obstacles || ''}
             onChange={(e) => updateForm('entrepreneurship_obstacles', e.target.value)}
             placeholder="Explica los factores que te han limitado..."
             className="w-full p-3 border border-input rounded-xl bg-background min-h-[120px] focus:ring-2 focus:ring-primary focus:outline-none"

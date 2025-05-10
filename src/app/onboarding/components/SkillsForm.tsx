@@ -127,11 +127,11 @@ export default function SkillsForm({ formData, updateForm }: SkillsFormProps) {
         </label>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           {[
-            { value: 'basic', label: 'Educación básica' },
-            { value: 'high_school', label: 'Secundaria' },
-            { value: 'technical', label: 'Técnico o pregrado' },
-            { value: 'university', label: 'Universitario (licenciatura)' },
-            { value: 'postgraduate', label: 'Posgrado' }
+            { value: 'basica', label: 'Educación básica' },
+            { value: 'secundaria', label: 'Secundaria' },
+            { value: 'tecnico_pregrado', label: 'Técnico o pregrado' },
+            { value: 'universitario_licenciatura', label: 'Universitario (licenciatura)' },
+            { value: 'postgrado', label: 'Posgrado' }
           ].map((option) => (
             <label key={option.value} className="flex items-center p-3 border border-input rounded-xl cursor-pointer hover:bg-secondary/10 transition">
               <input
