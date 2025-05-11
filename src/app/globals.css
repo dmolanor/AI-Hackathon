@@ -33,7 +33,13 @@
   --input: 37.5 36.36% 95.69%;                /* #F8F5F0 */
   --ring: 148.8 28.09% 17.45%;                /* #20392C */
 
-  --radius: 0.625rem;
+  --radius: 1rem;
+}
+
+/* Smooth scrolling and navbar offset */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 64px; /* Corresponds to NAVBAR_HEIGHT_PX */
 }
 
 /* Animaciones personalizadas */

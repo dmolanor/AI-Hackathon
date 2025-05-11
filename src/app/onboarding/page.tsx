@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic'
 
 import { createClient } from '@/utils/supabase/client';
 import { User } from '@supabase/supabase-js';
-import { ArrowLeft, ArrowRight, Check, Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BarChart3, Check, Loader2, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -19,9 +19,15 @@ import WorkExperienceForm from './components/WorkExperienceForm';
 export default function OnboardingPage() {
   const router = useRouter()
   const supabase = createClient()
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false) // Para el estado general de envío/carga de IA
   const [user, setUser] = useState<User | null>(null)
   const [step, setStep] = useState(1)
+  
+  // Nuevos estados para el análisis de IA
+  const [aiAnalysisResult, setAiAnalysisResult] = useState<string | null>(null);
+  const [analysisComplete, setAnalysisComplete] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+
   const [formData, setFormData] = useState({
     // Datos de perfil
     full_name: '',
@@ -97,30 +103,6 @@ export default function OnboardingPage() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !user) return;
-
-    try {
-      setLoading(true);
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}-${Math.random()}.${fileExt}`;
-      const { error: uploadError } = await supabase.storage
-        .from('cvs')
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage.from('cvs').getPublicUrl(fileName);
-      updateForm('cv_url', publicUrl);
-    } catch (error) {
-      console.error('Error al subir el archivo:', error);
-      alert('Error al subir el archivo. Inténtalo de nuevo.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const nextStep = () => setStep(prev => prev + 1);
   const prevStep = () => setStep(prev => prev - 1);
 
@@ -131,6 +113,8 @@ export default function OnboardingPage() {
       return;
     }
     setLoading(true);
+    setAiError(null); // Limpiar errores previos de IA
+    setAnalysisComplete(false); // Asegurarse que no se muestre análisis previo
 
     try {
       // Prepare profileUpdates from formData
@@ -201,30 +185,106 @@ export default function OnboardingPage() {
         body: JSON.stringify(payload),
       });
 
+      const resultData = await response.json(); // Leer el cuerpo de la respuesta una vez
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
+        // const errorData = await response.json(); // No necesitas esto si ya leiste response.json()
+        throw new Error(resultData.error || `Error ${response.status}: ${response.statusText}`);
       }
 
-      // const result = await response.json(); // Optional: if you need to use the result
-      // console.log('Onboarding data saved:', result);
+      // console.log('Onboarding data saved and AI analysis requested:', resultData);
 
-      router.push('/dashboard'); // Redirect after successful submission
+      if (resultData.aiAnalysis) {
+        setAiAnalysisResult(resultData.aiAnalysis);
+      } else {
+        // Si aiAnalysis es null/undefined pero la respuesta fue OK, podría ser un error parcial.
+        setAiError('No se pudo generar el análisis de IA, pero tus datos se guardaron.');
+        console.warn('AI analysis was not returned from /api/onboarding, but request was successful.');
+      }
+      setAnalysisComplete(true); // Marcar que el proceso (incluyendo intento de IA) ha terminado
+      // No redirigir aquí, se mostrará el análisis en la misma página
+
     } catch (error) {
-      console.error('Error al guardar datos de onboarding:', error);
-      alert(`Se produjo un error al guardar tus datos: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+      console.error('Error al guardar datos de onboarding o al procesar IA:', error);
+      setAiError(`Se produjo un error: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+      setAnalysisComplete(true); // Marcar como completo incluso si hay error para mostrar mensaje
     } finally {
-      setLoading(false);
+      setLoading(false); // Termina el estado de carga principal
     }
   };
 
   // Determina el número total de pasos del formulario
   const totalSteps = 6; // Perfil + 5 secciones del test
 
+  // Si el análisis está completo, mostrar los resultados
+  if (analysisComplete) {
+    return (
+      <div className="max-w-3xl mx-auto p-6 md:p-8 flex flex-col items-center justify-center min-h-screen font-montserrat">
+        <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 w-full text-center">
+          {aiAnalysisResult && (
+            <>
+              <Sparkles className="w-16 h-16 text-headerOrange mx-auto mb-6" />
+              <h1 className="text-3xl font-montserrat font-black text-headerOrange mb-4">¡Análisis Completado!</h1>
+              <p className="font-montserrat text-descriptionText mb-6">
+                Hemos analizado tus respuestas, incluyendo la información de tu CV y perfil de LinkedIn (si fueron proporcionados).
+                Aquí tienes un resumen de tu perfil emprendedor:
+              </p>
+              <div className="bg-gray-100 p-6 rounded-xl text-left mb-8 whitespace-pre-wrap font-mono text-sm">
+                {aiAnalysisResult}
+              </div>
+            </>
+          )}
+          {aiError && (
+            <>
+              <BarChart3 className="w-16 h-16 text-red-500 mx-auto mb-6" /> {/* Icono diferente para error/info */}
+              <h1 className="text-3xl font-montserrat font-black text-red-600 mb-4">Información</h1>
+              <p className="font-montserrat text-descriptionText mb-8">
+                {aiError}
+              </p>
+            </>
+          )}
+          {(!aiAnalysisResult && !aiError) && (
+             <>
+              <BarChart3 className="w-16 h-16 text-headerOrange mx-auto mb-6" />
+              <h1 className="text-3xl font-montserrat font-black text-headerOrange mb-4">Proceso Completado</h1>
+              <p className="font-montserrat text-descriptionText mb-8">
+                Tus datos han sido guardados correctamente. No se generó un análisis de IA en este momento.
+              </p>
+            </>
+          )}
+          <button
+            onClick={() => router.push('/dashboard')}
+            className="w-full flex items-center justify-center px-6 py-3 bg-headerOrange text-white font-montserrat font-semibold rounded-xl shadow-md hover:bg-orange-500 transition text-lg"
+          >
+            Ir a mi Dashboard
+            <ArrowRight className="ml-2 h-5 w-5" />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Si está cargando (esperando a la IA después de enviar el formulario)
+  if (loading) { // Este 'loading' ahora es específico para el proceso post-submit
+    return (
+      <div className="max-w-3xl mx-auto p-6 md:p-8 flex flex-col items-center justify-center min-h-screen font-montserrat">
+        <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 w-full text-center">
+          <Loader2 className="w-20 h-20 text-headerOrange mx-auto mb-8 animate-spin" />
+          <h1 className="text-3xl font-montserrat font-black text-headerOrange mb-4">Analizando tu Potencial...</h1>
+          <p className="font-montserrat text-descriptionText text-lg">
+            Estamos procesando tus respuestas y generando tu análisis personalizado con IA.
+            Esto puede tardar unos momentos. ¡Gracias por tu paciencia!
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Formulario de Onboarding (código existente)
   return (
-    <div className="max-w-3xl mx-auto p-6 md:p-8">
-      <div className="bg-white rounded-2xl shadow-md p-6 md:p-8">
-        <h1 className="text-3xl font-bold text-primary mb-8 text-center">
+    <div className="max-w-3xl mx-auto p-6 md:p-8 font-montserrat">
+      <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+        <h1 className="text-3xl font-montserrat font-black text-headerGrayBlack mb-8 text-center">
           {step === 1 && "Completa tu perfil"}
           {step === 2 && "Personalidad Emprendedora"}
           {step === 3 && "Experiencia Profesional"}
@@ -234,14 +294,14 @@ export default function OnboardingPage() {
         </h1>
 
         {/* Barra de progreso */}
-        <div className="w-full bg-secondary/30 h-2 rounded-full mb-8">
-          <div 
-            className="bg-primary h-2 rounded-full transition-all duration-300" 
+        <div className="w-full bg-gray-200 h-2 rounded-full mb-8">
+          <div
+            className="bg-headerOrange h-2 rounded-full transition-all duration-300"
             style={{ width: `${(step / totalSteps) * 100}%` }}
           ></div>
         </div>
 
-        <div className="mb-2 text-sm text-muted-foreground">
+        <div className="mb-2 text-sm font-montserrat text-descriptionText">
           Paso {step} de {totalSteps}
         </div>
 
@@ -251,7 +311,6 @@ export default function OnboardingPage() {
             <ProfileInfoForm 
               formData={formData} 
               updateForm={updateForm} 
-              handleFileUpload={handleFileUpload}
               loading={loading}
             />
           )}
@@ -298,7 +357,7 @@ export default function OnboardingPage() {
                 type="button"
                 onClick={prevStep}
                 disabled={loading}
-                className="flex items-center px-6 py-3 border border-input text-foreground rounded-xl hover:bg-secondary/10 transition"
+                className="flex items-center px-6 py-3 border border-headerOrange text-headerOrange font-montserrat font-semibold rounded-xl hover:bg-headerOrange/10 transition disabled:opacity-50"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Anterior
@@ -311,7 +370,7 @@ export default function OnboardingPage() {
               <button
                 type="button"
                 onClick={nextStep}
-                className="flex items-center px-6 py-3 bg-primary text-primary-foreground rounded-xl shadow-sm hover:bg-primary/90 transition"
+                className="flex items-center px-6 py-3 bg-headerOrange text-white font-montserrat font-semibold rounded-xl shadow-md hover:bg-orange-500 transition"
               >
                 Siguiente
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -321,7 +380,7 @@ export default function OnboardingPage() {
                 type="button"
                 onClick={saveToSupabase}
                 disabled={loading}
-                className="flex items-center px-6 py-3 bg-primary text-primary-foreground rounded-xl shadow-sm hover:bg-primary/90 transition"
+                className="flex items-center px-6 py-3 bg-headerOrange text-white font-montserrat font-semibold rounded-xl shadow-md hover:bg-orange-500 transition disabled:opacity-50"
               >
                 {loading ? (
                   <>

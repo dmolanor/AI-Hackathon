@@ -22,27 +22,27 @@ interface PersonalityTraitsFormProps {
 // Componente para pregunta con escala
 const ScaleQuestion = ({ id, question, value, onChange }: ScaleQuestionProps) => {
   return (
-    <div className="mb-6">
-      <p className="mb-2 font-medium">{question}</p>
+    <div className="mb-6 font-montserrat">
+      <p className="mb-3 font-montserrat font-medium text-headerGrayBlack text-base">{question}</p>
       <div className="flex justify-between items-center">
-        <span className="text-xs text-muted-foreground">Totalmente en desacuerdo</span>
-        <div className="flex space-x-2">
+        <span className="text-xs font-montserrat text-descriptionText text-center w-1/5 px-1">Totalmente en desacuerdo</span>
+        <div className="flex space-x-1 sm:space-x-2">
           {[1, 2, 3, 4, 5].map((num) => (
             <button
               key={num}
               type="button"
-              className={`w-10 h-10 rounded-full flex items-center justify-center transition ${
-                value === num 
-                  ? 'bg-primary text-primary-foreground' 
-                  : 'bg-secondary/30 hover:bg-secondary/50 text-foreground'
-              }`}
+              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-150 ease-in-out font-montserrat font-semibold text-sm
+                ${value === num
+                  ? 'bg-headerOrange text-white shadow-md ring-2 ring-orange-300'
+                  : 'bg-gray-200 hover:bg-gray-300 text-headerGrayBlack focus:ring-2 focus:ring-headerOrange/50 focus:outline-none'
+                }`}
               onClick={() => onChange(id, num)}
             >
               {num}
             </button>
           ))}
         </div>
-        <span className="text-xs text-muted-foreground">Totalmente de acuerdo</span>
+        <span className="text-xs font-montserrat text-descriptionText text-center w-1/5 px-1">Totalmente de acuerdo</span>
       </div>
     </div>
   );
@@ -50,8 +50,8 @@ const ScaleQuestion = ({ id, question, value, onChange }: ScaleQuestionProps) =>
 
 export default function PersonalityTraitsForm({ formData, updateForm }: PersonalityTraitsFormProps) {
   return (
-    <div className="space-y-6">
-      <p className="text-lg font-medium mb-4">
+    <div className="space-y-8 font-montserrat">
+      <p className="text-base font-montserrat font-light text-descriptionText mb-6">
         Evalúa las siguientes afirmaciones según tu grado de acuerdo, donde 1 es &quot;Totalmente en desacuerdo&quot; y 5 es &quot;Totalmente de acuerdo&quot;.
       </p>
       
@@ -105,14 +105,16 @@ export default function PersonalityTraitsForm({ formData, updateForm }: Personal
       />
       
       <div>
-        <label className="block text-sm font-medium text-foreground mb-2">
+        <label htmlFor="perseverance_experience" className="block text-sm font-montserrat font-medium text-headerGrayBlack mb-1.5">
           Describe una situación de tu vida (laboral, académica o personal) en la que perseveraste a pesar de las dificultades para lograr una meta importante. ¿Qué aprendiste de esa experiencia?
         </label>
         <textarea
+          id="perseverance_experience"
           value={formData.perseverance_experience}
           onChange={(e) => updateForm('perseverance_experience', e.target.value)}
           placeholder="Comparte tu experiencia..."
-          className="w-full p-3 border border-input rounded-xl bg-background min-h-[120px] focus:ring-2 focus:ring-primary focus:outline-none"
+          rows={5}
+          className="w-full p-3 font-montserrat border border-gray-300 rounded-xl bg-gray-50 min-h-[120px] focus:ring-2 focus:ring-headerOrange focus:outline-none transition-shadow duration-150 shadow-sm focus:shadow-md"
         />
       </div>
     </div>

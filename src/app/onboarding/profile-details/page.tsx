@@ -55,37 +55,6 @@ export default function ProfileDetailsPage() {
     setFormData(prev => ({ ...prev, [field as keyof ProfileDetailsFormData]: value }));
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0 || !user) {
-      return;
-    }
-    const file = e.target.files[0];
-    const filePath = `${user.id}/${Date.now()}_${file.name}`;
-    setSubmitLoading(true);
-    setError(null);
-    try {
-      const { error: uploadError } = await supabase.storage
-        .from('cvs') // Ensure 'cvs' bucket exists and has correct policies
-        .upload(filePath, file);
-
-      if (uploadError) {
-        throw uploadError;
-      }
-
-      const { data: { publicUrl } } = supabase.storage.from('cvs').getPublicUrl(filePath);
-      if (!publicUrl) {
-        throw new Error('Could not get public URL for CV.');
-      }
-      updateForm('cv_url', publicUrl);
-    } catch (uploadError) {
-      console.error('Error uploading CV:', uploadError);
-      const message = uploadError instanceof Error ? uploadError.message : String(uploadError);
-      setError(`Error al subir CV: ${message}`);
-    } finally {
-      setSubmitLoading(false);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!user) {
@@ -136,7 +105,6 @@ export default function ProfileDetailsPage() {
           <ProfileInfoForm 
             formData={formData} 
             updateForm={updateForm} 
-            handleFileUpload={handleFileUpload} 
             loading={submitLoading} 
           />
           <button 

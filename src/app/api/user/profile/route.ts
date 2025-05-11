@@ -3,6 +3,11 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
+// Definición del tipo PossibleValue si no está ya importado o definido globalmente
+// Si ya está definido en otro lugar (ej. onboarding/route.ts) y es accesible, no necesitas redefinirlo.
+// Por simplicidad, lo redefiniré aquí si este archivo es independiente.
+type PossibleValue = string | number | boolean | string[] | null | undefined;
+
 export async function GET() {
   // await the cookies store before using it
   const cookieStore = await cookies();
@@ -185,12 +190,12 @@ export async function PUT(request: Request) {
       'digital_skills','problem_solving','learning_investment','education_level',
       'skills_to_develop'
     ];
-    const updates: Record<string, any> = {};
+    const updates: Record<string, PossibleValue> = {};
     for (const k of allowed) {
       if (profileUpdates[k] !== undefined) updates[k] = profileUpdates[k];
     }
 
-    let profileData = null;
+    let profileData: Record<string, PossibleValue> | null = null;
     let profileErr = null;
 
     if (Object.keys(updates).length) {

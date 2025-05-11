@@ -1,4 +1,4 @@
-import { BotMessageSquare, GraduationCap, Lightbulb, Users } from 'lucide-react';
+import { BrainCircuit, CircleDollarSign, Clock, MonitorPlay, ShieldCheck, Users } from 'lucide-react';
 import React from 'react';
 
 interface Feature {
@@ -8,31 +8,43 @@ interface Feature {
   description: string;
 }
 
-// Updated feature data based on SYSTEMPROMPT.md
-const features: Feature[] = [
+// Updated feature data based on HTML mockup (Beneficios section)
+const featuresData: Feature[] = [
   {
     id: 1,
-    icon: BotMessageSquare,
-    title: 'Evaluación de Perfil con IA',
-    description: 'Realiza nuestro test psicométrico potenciado por IA para descubrir tu potencial emprendedor y áreas de mejora.',
+    icon: CircleDollarSign, // Placeholder, to be mapped to actual icons
+    title: 'Ingresos Inmediatos',
+    description: 'Genera ingresos desde casa con tareas flexibles que se adaptan a tu horario y necesidades.',
   },
   {
     id: 2,
-    icon: GraduationCap,
-    title: 'Rutas de Aprendizaje Personalizadas',
-    description: 'Recibe recomendaciones de cursos y recursos adaptados a tu perfil para acelerar tu desarrollo profesional.',
+    icon: MonitorPlay, // Placeholder
+    title: 'Habilidades del Futuro',
+    description: 'Adquiere competencias en IA, análisis de datos y más, con micro-lecciones diseñadas por expertos.',
   },
   {
     id: 3,
-    icon: Users,
-    title: 'Comunidad y Co-founders',
-    description: 'Conecta con otros profesionales y emprendedores, comparte ideas y encuentra a tu próximo co-founder.',
+    icon: BrainCircuit, // Placeholder
+    title: 'Aprendizaje Personalizado',
+    description: 'Nuestra IA adapta tu ruta de aprendizaje a tu ritmo, intereses y las demandas del mercado.',
   },
   {
     id: 4,
-    icon: Lightbulb,
-    title: 'Validación y Lanzamiento de Ideas',
-    description: 'Utiliza nuestras herramientas y la red de contactos para validar tus ideas de negocio y dar los primeros pasos.',
+    icon: Clock,
+    title: 'Flexibilidad Total',
+    description: 'Trabaja cuándo y dónde quieras. SkillBloom se adapta a tu vida, no al revés.',
+  },
+  {
+    id: 5,
+    icon: Users,
+    title: 'Comunidad de Apoyo',
+    description: "Únete a una red de 'SkillBloomers' como tú, listos para crecer, aprender y apoyarse mutuamente.", // Updated to SkillBloomers
+  },
+  {
+    id: 6,
+    icon: ShieldCheck,
+    title: 'Preparación Real',
+    description: 'No solo aprendas teoría. Aplica tus conocimientos en tareas reales y construye un portafolio sólido.',
   },
 ];
 
@@ -44,44 +56,38 @@ interface FeatureCardProps {
 }
 
 const FeatureCard = ({ icon: Icon, title, description, index }: FeatureCardProps) => {
-  // For scroll-triggered animation, you'd use framer-motion here.
-  // For now, we apply the class directly for CSS animation.
-  // The actual triggering on viewport enter would ideally be handled by Intersection Observer or a library.
-  // Tailwind doesn't have a built-in way to trigger animations on scroll without JS or a utility like `tailwindcss-interaction-variants`.
-  // For this step, we'll assume the animation class is present and would be toggled by JS if scroll trigger is strictly CSS.
-  // As per prompt, framer-motion is only for scroll-trigger; the rest CSS. So animation class should be toggled by a scroll observer.
-  // For now, let's just add the class. A simple implementation might be to add it after a delay or on interaction for demo.
-  // Since the prompt says "al entrar en viewport" and framer-motion is later, we will just add the class for now.
   return (
     <div 
-      className="bg-background p-6 rounded-lg shadow-md flex flex-col items-start animate-fade-in-up" 
-      style={{ animationDelay: `${index * 100}ms` }} // Simple stagger effect
+      className="bg-white p-6 rounded-2xl shadow-lg flex flex-col items-start animate-fade-in-up"
+      style={{ animationDelay: `${index * 100}ms` }}
     >
-      <div className="mb-4">
-        <Icon className="w-8 h-8 text-primary" />
+      {/* Updated icon presentation */}
+      <div className="flex items-center justify-center w-12 h-12 bg-headerOrange/10 text-headerOrange rounded-full mb-4">
+        <Icon className="w-6 h-6" /> {/* Icon size within the circle */}
       </div>
-      <h3 className="text-xl font-semibold text-foreground mb-2">{title}</h3>
-      <p className="text-muted-foreground text-sm">{description}</p>
+      <h3 className="text-xl font-montserrat font-black text-headerGrayBlack mb-2">{title}</h3>
+      <p className="font-montserrat font-light text-descriptionText text-sm">{description}</p>
     </div>
   );
 };
 
 export default function FeatureGrid() {
   return (
-    <section className="w-full py-16 md:py-24 bg-bg-alt">
+    <section id="beneficios" className="w-full py-16 md:py-24 bg-bg-alt"> {/* Added id */}
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground">Funcionalidades Clave</h2>
-          <p className="text-lg text-muted-foreground mt-2">Descubre cómo te ayudamos a reinventarte.</p>
+          {/* Updated section title and subtitle from HTML */}
+          <h2 className="text-3xl md:text-4xl font-montserrat font-black text-headerGrayBlack">Descubre Todo lo que SkillBloom Puede Hacer por Ti</h2> 
+          <p className="text-lg font-montserrat font-light text-descriptionText mt-2 max-w-2xl mx-auto">Te ofrecemos las herramientas y el apoyo que necesitas para prosperar en el nuevo panorama laboral.</p>
         </div>
-        <div className="grid md:grid-cols-2 gap-12">
-          {features.map((feature, index) => (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"> {/* Changed to lg:grid-cols-3 for 6 items */}
+          {featuresData.map((feature, index) => (
             <FeatureCard 
               key={feature.id} 
               icon={feature.icon} 
               title={feature.title} 
               description={feature.description} 
-              index={index} // For stagger
+              index={index}
             />
           ))}
         </div>

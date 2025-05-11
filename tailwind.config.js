@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 /** @type {import('tailwindcss').Config} */
 // tailwind.config.js
 module.exports = {
@@ -14,6 +15,12 @@ module.exports = {
                 foreground: '#20392C',
                 muted: '#959C91',
                 'bg-alt': '#F8F5F0',
+                logo: '#ff8e2e',
+                headerGrayBlack: '#262626',
+                headerOrange: '#ff8e2e',
+                descriptionText: '#515151',
+                bgMain: '#ffdfcd',
+                themeYellow: '#FFC72C',
                 border: 'hsl(var(--border))',
                 input: 'hsl(var(--input))',
                 ring: 'hsl(var(--ring))',
@@ -38,6 +45,7 @@ module.exports = {
             fontFamily: {
                 sans: ['var(--font-inter)', 'ui-sans-serif', 'system-ui'],
                 mono: ['ui-monospace', 'SFMono-Regular'],
+                montserrat: ['Montserrat', 'sans-serif'],
             },
             borderRadius: {
                 lg: `var(--radius)`,
