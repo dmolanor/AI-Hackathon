@@ -1,26 +1,11 @@
 "use client"; // Required for useEffect and event listeners
 
-import { createClient } from '@/utils/supabase/client'; // Import Supabase client
 import Head from 'next/head';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 export default function LandingPage() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [showLandingNav, setShowLandingNav] = useState(true); // Default to true, hide if user is logged in
-
   useEffect(() => {
-    const supabase = createClient();
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        setShowLandingNav(false); // User is logged in, hide landing page nav
-      } else {
-        setShowLandingNav(true); // No user, show landing page nav
-      }
-    };
-    checkSession();
-
     // Smooth scroll for navigation links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener('click', function (this: HTMLAnchorElement, e: Event) {
@@ -30,8 +15,10 @@ export default function LandingPage() {
         if (targetId && targetId.length > 1) {
           const targetElement = document.querySelector(targetId);
           if (targetElement) {
-            const navbar = document.querySelector('nav');
-            const navbarHeight = navbar ? navbar.offsetHeight : 0;
+            // Try to select the main navbar, which is a header tag in layout.tsx
+            // Or more robustly, give the main navbar an ID if needed for querySelector
+            const mainNavbar = document.querySelector('header nav') || document.querySelector('nav'); 
+            const navbarHeight = mainNavbar ? (mainNavbar as HTMLElement).offsetHeight : 0;
             const elementPosition = targetElement.getBoundingClientRect().top;
             const offsetPosition = elementPosition + window.pageYOffset - navbarHeight;
 
@@ -39,19 +26,13 @@ export default function LandingPage() {
               top: offsetPosition,
               behavior: "smooth"
             });
-            setMobileMenuOpen(false);
           }
         } else if (targetId === "#") {
            window.scrollTo({ top: 0, behavior: "smooth" });
-           setMobileMenuOpen(false);
         }
       });
     });
   }, []);
-
-  const toggleMobileMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
-  };
 
   const inlineStyles = `
     body {
@@ -119,39 +100,6 @@ export default function LandingPage() {
       <style dangerouslySetInnerHTML={{ __html: inlineStyles }} />
 
       <div className="bg-gray-50 text-descriptionText font-montserrat"> {/* Added font-montserrat here for global application within this page */}
-        {showLandingNav && (
-          <nav className="navbar-sticky shadow-md">
-              <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-                  <Link href="#" className="text-2xl font-extrabold text-headerOrange">
-                      SkillBloom
-                  </Link>
-                  <div className="hidden md:flex space-x-6 items-center">
-                      <Link href="#desafio" className="text-gray-600 hover:text-headerOrange font-medium">El Desafío</Link>
-                      <Link href="#solucion" className="text-gray-600 hover:text-headerOrange font-medium">Nuestra Solución</Link>
-                      <Link href="#beneficios" className="text-gray-600 hover:text-headerOrange font-medium">Beneficios</Link>
-                      <Link href="#testimonios" className="text-gray-600 hover:text-headerOrange font-medium">Testimonios</Link>
-                      <Link href="/auth?mode=signup" className="cta-button text-white font-semibold py-2 px-6 rounded-lg shadow-md hover:shadow-lg">
-                          Prueba Gratis
-                      </Link>
-                  </div>
-                  <div className="md:hidden">
-                      <button id="mobile-menu-button" onClick={toggleMobileMenu} className="text-gray-600 focus:outline-none">
-                          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-                      </button>
-                  </div>
-              </div>
-              <div id="mobile-menu" className={`md:hidden ${mobileMenuOpen ? '' : 'hidden'} px-6 pb-4 space-y-2`}>
-                  <Link href="#desafio" className="block text-gray-600 hover:text-headerOrange font-medium">El Desafío</Link>
-                  <Link href="#solucion" className="block text-gray-600 hover:text-headerOrange font-medium">Nuestra Solución</Link>
-                  <Link href="#beneficios" className="block text-gray-600 hover:text-headerOrange font-medium">Beneficios</Link>
-                  <Link href="#testimonios" className="block text-gray-600 hover:text-headerOrange font-medium">Testimonios</Link>
-                  <Link href="/auth?mode=signup" className="block w-full text-center cta-button text-white font-semibold py-2 px-6 rounded-lg shadow-md hover:shadow-lg mt-2">
-                      Prueba Gratis
-                  </Link>
-              </div>
-          </nav>
-        )}
-
         <header className="hero-bg pt-16 pb-24 md:pt-24 md:pb-32 text-center">
             <div className="container mx-auto px-6">
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-headerGrayBlack mb-6 leading-tight">
@@ -407,7 +355,7 @@ export default function LandingPage() {
                         <div className="mt-4 flex space-x-4">
                             <Link href="#" className="text-gray-400 hover:text-white"><svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd" /></svg></Link>
                             <Link href="#" className="text-gray-400 hover:text-white"><svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" /></svg></Link>
-                            <Link href="#" className="text-gray-400 hover:text-white"><svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fillRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.148 6.701 9.536.21.039.285-.092.285-.204v-1.747c-2.786.604-3.375-1.342-3.375-1.342-.191-.487-.467-.617-.467-.617-.382-.261.029-.256.029-.256.423.03.646.435.646.435.375.643.984.457 1.223.35.038-.272.147-.457.266-.562-1.892-.215-3.882-.946-3.882-4.205 0-.929.332-1.689.875-2.285-.088-.215-.379-1.08.083-2.252 0 0 .715-.229 2.344.874.679-.189 1.408-.283 2.132-.286.725.003 1.453.097 2.132.286 1.629-1.103 2.344-.874 2.344-.874.462 1.172.171 2.037.083 2.252.543.596.875 1.356.875 2.285 0 3.269-1.993 3.987-3.89 4.199.151.13.285.388.285.782v1.174c0 .114.072.246.288.202A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clipRule="evenodd" /></svg></Link>
+                            <Link href="#" className="text-gray-400 hover:text-white"><svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fillRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.148 6.701 9.536.21.039.285-.092.285-.204v-1.747c-2.786.604-3.375-1.342-3.375-1.342-.191-.487-.467-.467-.467-.382-.261.029-.256.029-.256.423.03.646.435.646.435.375.643.984.457 1.223.35.038-.272.147-.457.266-.562-1.892-.215-3.882-.946-3.882-4.205 0-.929.332-1.689.875-2.285-.088-.215-.379-1.08.083-2.252 0 0 .715-.229 2.344.874.679-.189 1.408-.283 2.132-.286.725.003 1.453.097 2.132.286 1.629-1.103 2.344-.874 2.344-.874.462 1.172.171 2.037.083 2.252.543.596.875 1.356.875 2.285 0 3.269-1.993 3.987-3.89 4.199.151.13.285.388.285.782v1.174c0 .114.072.246.288.202A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clipRule="evenodd" /></svg></Link>
                         </div>
                     </div>
                 </div>
